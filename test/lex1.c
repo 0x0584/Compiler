@@ -65,7 +65,8 @@ void skipblanks ()
 	      }
         //move past * at end of (* *)
         if(comp)
-           getchar();
+           //getchar(); <<<<<<<<<<--------------------- dont know if i need this.. 
+          //causing me to loose first character off everyword past first word
          getchar();
 	    }
     }
@@ -95,21 +96,27 @@ TOKEN identifier (TOKEN tok)
     name[15] = 0;
     name[count] = 0;
     strcpy(tok->stringval, name);
-    //check if reserved word
-    word = check(name, 0);
-    if(word >= 0) {
+    tok->datatype = STRINGTYPE;
+
+    if((word = check(name, 0)) >= 0){
+      //check if reserved word
       tok->tokentype = RESERVED;
       tok->whichval = word;
     }
-    else
-      word = check(name, 1);
-
-  
-
+    else if((word = check(name, 1)) >= 0){
+      //check if operator reserve word
+      tok->tokentype = OPERATOR;
+      tok->whichval = word;
     }
+    else{
+      //identifier is normal
+      tok->tokentype = IDENTIFIERTOK;
+    }
+  }
 
 TOKEN getstring (TOKEN tok)
   {
+
     }
 
 TOKEN special (TOKEN tok)
