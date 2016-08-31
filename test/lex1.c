@@ -27,6 +27,16 @@
 #include "token.h"
 #include "lexan.h"
 
+char *operators[] = {"+", "-", "*", "/", ":=", "=", "<>", "<", "<=",
+ ">=", ">", "^", ".", "and", "or", "not", "div", "mod", "in"};
+
+ char *dilimiters[] = {",", ";", ":", "(", ")", "[", "]", ".."};
+
+char *reserve[] = {"array", "begin", "case", "const", "do", "downto",
+ "else", "end", "file", "for", "function", "goto", "if", "label", "nil",
+ "of", "packed", "procedure", "program", "record", "repeat", "set", "then"
+ "to", "type", "until", "var", "while", "with"};
+ 
 /* This file will work as given with an input file consisting only
    of integers separated by blanks:
    make lex1
@@ -38,9 +48,27 @@
 void skipblanks ()
   {
       int c;
-      while ((c = peekchar()) != EOF
-             && (c == ' ' || c == '\n' || c == '\t'))
+      int cc;
+      int comp;
+
+      while ((c = peekchar()) != EOF && (c == ' ' || c == '\n' || c == '\t' ||
+       c == '{' || (c == '(' && ((cc = peek2char()) == '*')))){
+        //handeling { } comment type
+	      if(c == '{')
+          while(c = peekchar() != '}') 
+				      getchar();
+        //handeling (* *) comment type	
+		    else if(c == '(' && cc == '*'){
           getchar();
+			     while(cc = peek2char() != ')' && (c = peekchar() != '*')) 
+			     	getchar();
+	       	comp = 1;
+	       }
+         //move past * at end of (* *)
+         if(comp)
+            getchar();
+          getchar();
+	     }
     }
 
 /* Get identifiers and reserved words */
