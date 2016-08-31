@@ -42,3 +42,4 @@ TOKEN identifier (TOKEN tok);
 TOKEN getstring (TOKEN tok);
 TOKEN special (TOKEN tok);
 TOKEN number (TOKEN tok);
+int check (char *arg, int opp);

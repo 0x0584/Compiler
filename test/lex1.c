@@ -36,7 +36,7 @@ char *reserve[] = {"array", "begin", "case", "const", "do", "downto",
  "else", "end", "file", "for", "function", "goto", "if", "label", "nil",
  "of", "packed", "procedure", "program", "record", "repeat", "set", "then"
  "to", "type", "until", "var", "while", "with"};
- 
+
 /* This file will work as given with an input file consisting only
    of integers separated by blanks:
    make lex1
@@ -46,34 +46,66 @@ char *reserve[] = {"array", "begin", "case", "const", "do", "downto",
 
 /* Skip blanks and whitespace.  Expand this function to skip comments too. */
 void skipblanks ()
-  {
-      int c;
-      int cc;
-      int comp;
+  {  int c;
+     int cc;
+     int comp;
 
-      while ((c = peekchar()) != EOF && (c == ' ' || c == '\n' || c == '\t' ||
-       c == '{' || (c == '(' && ((cc = peek2char()) == '*')))){
-        //handeling { } comment type
-	      if(c == '{')
-          while(c = peekchar() != '}') 
-				      getchar();
-        //handeling (* *) comment type	
-		    else if(c == '(' && cc == '*'){
-          getchar();
-			     while(cc = peek2char() != ')' && (c = peekchar() != '*')) 
-			     	getchar();
-	       	comp = 1;
-	       }
-         //move past * at end of (* *)
-         if(comp)
-            getchar();
-          getchar();
-	     }
+    while ((c = peekchar()) != EOF && (c == ' ' || c == '\n' || c == '\t' ||
+      c == '{' || (c == '(' && ((cc = peek2char()) == '*')))){
+       //handeling { } comment type
+	     if(c == '{')
+        while(c = peekchar() != '}') 
+			      getchar();
+       //handeling (* *) comment type	
+		   else if(c == '(' && cc == '*'){
+         getchar();
+		     while(cc = peek2char() != ')' && (c = peekchar() != '*')) 
+		     	getchar();
+	     	comp = 1;
+	      }
+        //move past * at end of (* *)
+        if(comp)
+           getchar();
+         getchar();
+	    }
     }
 
 /* Get identifiers and reserved words */
 TOKEN identifier (TOKEN tok)
-  {
+  { char name[15];
+    char c = peekchar();
+    int count = 0;
+    int word;
+
+    //check identifier begins with a letter
+    if(c != EOF && CHARCLASS[c] == ALPHA) {
+        c = getchar();
+        name[count] = c;
+        count++;
+      }
+    else
+        return tok;
+
+    while((c = peekchar()) != EOF && (count <= 15) && (CHARCLASS[c] == ALPHA || CHARCLASS[c] == NUMERIC)) {
+      c = getchar();
+      name[count] = c;
+      count++;
+      c = peekchar();
+    }
+    name[15] = 0;
+    name[count] = 0;
+    strcpy(tok->stringval, name);
+    //check if reserved word
+    word = check(name, 0);
+    if(word >= 0) {
+      tok->tokentype = RESERVED;
+      tok->whichval = word;
+    }
+    else
+      word = check(name, 1);
+
+  
+
     }
 
 TOKEN getstring (TOKEN tok)
@@ -101,3 +133,18 @@ TOKEN number (TOKEN tok)
     return (tok);
   }
 
+//helper method to compare identifier to reserved words
+int check (char * arg, int opp) {
+  int index = 0;
+  int size = 28;                    
+  char ** look = reserve;
+  if(opp) {
+    index = 13;
+    size = 18;
+    look = operators;
+  }
+  for(index; index < size; index++)
+    if(strcmp(arg, look[index]) == 0)
+        return (index + 1);
+  return -1;
+}
