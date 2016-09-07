@@ -75,8 +75,7 @@ void skipblanks ()
 TOKEN identifier (TOKEN tok)
   { char name[15];
     char c = peekchar();
-    int count = 0;
-    int word;
+    int count = 0, which;
 
     //check identifier begins with a letter
     if(c != EOF && CHARCLASS[c] == ALPHA) {
@@ -98,15 +97,15 @@ TOKEN identifier (TOKEN tok)
     strcpy(tok->stringval, name);
     tok->datatype = STRINGTYPE;
 
-    if((word = check(name, 0)) >= 0){
+    if((which = check(name, 0)) >= 0){
       //check if reserved word
       tok->tokentype = RESERVED;
-      tok->whichval = word;
+      tok->whichval = which;
     }
-    else if((word = check(name, 1)) >= 0){
+    else if((which = check(name, 1)) >= 0){
       //check if operator reserve word
       tok->tokentype = OPERATOR;
-      tok->whichval = word;
+      tok->whichval = which;
     }
     else{
       //identifier is normal
@@ -116,11 +115,45 @@ TOKEN identifier (TOKEN tok)
 
 TOKEN getstring (TOKEN tok)
   {
-
+    char word[15];
+    int index = 0, done = 0;
+    getchar();
+    int c;
+    tok->tokentype = STRINGTOK;
+    tok->datatype = STRINGTYPE;
+    while(!done){
+      c = getchar();
+      if(peekchar() != '\'') {
+          if(index < 15) {
+            word[index] = c;
+            index++;
+            }
+        }
+      else if(peekchar() == '\''){
+        if(peek2char() == '\''){
+          getchar();
+          word[index] = c;
+          index++;
+        }
+        else {
+          getchar();
+          if(index < 15) {
+            word[index + 1] = 0;
+            word[index] = c;
+          }
+          done = 1;
+        }
+        word[15] = 0;
+      }
     }
+    strcpy(tok->stringval, word);
+  }
 
 TOKEN special (TOKEN tok)
   {
+  int c = peekchar();
+  int index = 0, which;
+
     }
 
 /* Get and convert unsigned numbers of all types. */
@@ -145,10 +178,14 @@ int check (char * arg, int opp) {
   int index = 0;
   int size = 28;                    
   char ** look = reserve;
-  if(opp) {
+  if(opp == 1) {
     index = 13;
     size = 18;
     look = operators;
+  }
+  else if(opp == 2){
+    size = 7;
+    look = dilimiters;
   }
   for(index; index < size; index++)
     if(strcmp(arg, look[index]) == 0)
