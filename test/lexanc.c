@@ -189,107 +189,98 @@ TOKEN special (TOKEN tok)
 
 /* Get and convert unsigned numbers of all types. */
 TOKEN number (TOKEN tok) { 
-      int  c, charval;
+    int  c, charval;
     
+    double neg_dec[100]; // negative decimal conversion list
+    int neg_init = 0;
+
+    double pos_dec[100]; // positive decimal conversion list
+    int pos_init = 0;
+
     // potential values of the number being read
-    long lnum = 0; // integer values
-    double dnum = 0; // 
-    int expVal = 0;
+    long long_num = 0; // integer values
+    double double_num = 0; 
+    int expo_num = 0;
     
     // counters
-    int sigDigCounter= 0;
-    int dclCounter = 1;
-    int firstSigDigLoc = 0;
+    int sig_dig = 0;
+    int dec_count = 1;
+    int first_sig = 0;
     
     // flags 
-    int nonZeroFlag = 0; // remains zero until a non-zero number is hit.
-    int realNumFlag = 0; // will remain zero if token reps and int, will switch to 1 if it's a double
-    int expSignFlag = 0; // zero if pos, 1 if neg
-    int intErrorFlag = 0; // 1 if int can't be stored in 32 bits
-    int floatErrorFlag = 0; // 1 if net exponent is not between -38 and 38
-
-    double dcl[100]; // negative decimal conversion list
-    int dclCreated = 0;
-
-    double pdcl[100]; // positive decimal conversion list
-    int pdclCreated = 0;
+    int zero_flag = 0; // remains zero until a non-zero number is hit.
+    int real_flag = 0; // will remain zero if token reps and int, will switch to 1 if it's a double
+    int sign = 0; // zero if pos, 1 if neg
+    int int_flag = 0; // 1 if int can't be stored in 32 bits
+    int exp_flag = 0; // 1 if net exponent is not between -38 and 38
     
+    int i;
     // get digits before decimal or e
-    while ( (c = peekchar()) != EOF
-            && CHARCLASS[c] == NUMERIC)
-    {   
+    while ( (c = peekchar()) != EOF && CHARCLASS[c] == NUMERIC) {   
         c = getchar();
         charval = (c - '0');
         if(charval != 0)
-            nonZeroFlag = 1;
-        lnum = lnum * 10 + charval;
-        if(nonZeroFlag == 1){
-            if(sigDigCounter >= 8)
+            zero_flag = 1;
+        long_num = (long_num * 10) + charval;
+        if(zero_flag == 1){
+            if(sig_dig  >= 8)
                 charval = 0;
-            dnum = dnum * 10 + charval;
-            sigDigCounter++;
+            double_num = (double_num * 10) + charval;
+            sig_dig ++;
         }
     }
-    firstSigDigLoc = sigDigCounter - 1;
+    first_sig = sig_dig  - 1;
     
     
     // int error checking
-    if(sigDigCounter > 10 || lnum < 0 || lnum > 2147483647)
-        intErrorFlag = 1;
+    if(sig_dig  > 10 || long_num < 0 || long_num > 2147483647)
+        int_flag = 1;
     
     // create decimal conversion look-up tables, if not already created
-    if(dclCreated == 0) {
-            dcl[0] = 1;
-    int i = 1;
-    for(; i < 100; i++)
-        dcl[i] = dcl[i-1] * .1;
-        dclCreated =1;
+    if(neg_init == 0) {
+            neg_dec[0] = 1;
+    for(i = 1; i < 100; i++)
+        neg_dec[i] = neg_dec[i-1] * .1;
+        neg_init =1;
     }
-    if(pdclCreated == 0){
-    pdcl[0] = 1;
-    int i = 1;
-    for(; i < 100; i++)
-        pdcl[i] = pdcl[i-1] * 10;
-        pdclCreated = 1;
+    if(pos_init == 0){
+    pos_dec[0] = 1;
+
+    for(i = 1; i < 100; i++)
+        pos_dec[i] = pos_dec[i-1] * 10;
+        pos_init = 1;
     }
     // get value after decimal, if present
-    if((c = peekchar()) == '.' && CHARCLASS[peek2char()] == NUMERIC)
-    {
-
-        realNumFlag = 1;
-        getchar(); //eat the period
+    if((c = peekchar()) == '.' && CHARCLASS[peek2char()] == NUMERIC) {
+        real_flag = 1;
         double dcharval;
-        while ( (c = peekchar()) != EOF
-            && CHARCLASS[c] == NUMERIC)
-        {  
+        getchar(); //eat the period
+        while ( (c = peekchar()) != EOF && CHARCLASS[c] == NUMERIC) {  
             c = getchar();
             dcharval = (c - '0');
 
             if(dcharval != 0)
-                nonZeroFlag = 1;
-            if(nonZeroFlag == 0)
-                firstSigDigLoc--;
-            
-            
-            
-            dcharval *= dcl[dclCounter++];
-            if(nonZeroFlag == 1 && sigDigCounter < 8){
-                ++sigDigCounter;
-                dnum += dcharval;
+                zero_flag = 1;
+            if(zero_flag == 0)
+                first_sig--;
+
+            dcharval *= neg_dec[dec_count++];
+            if(zero_flag == 1 && sig_dig  < 8){
+                ++sig_dig ;
+                double_num += dcharval;
             }
         }
     }
     
     // move sig digits to zero
-    if(firstSigDigLoc > 0)
-        dnum *= dcl[firstSigDigLoc];
-    else if(firstSigDigLoc < 0)
-        dnum *= pdcl[-firstSigDigLoc];
+    if(first_sig > 0)
+        double_num *= neg_dec[first_sig];
+    else if(first_sig < 0)
+        double_num *= pos_dec[-first_sig];
         
     // get exponent if present
-    if((c = peekchar()) == 'e' || c == 'E') 
-    {
-        realNumFlag = 1;
+    if((c = peekchar()) == 'e' || c == 'E') {
+        real_flag = 1;
         getchar(); // eat the 'e'
         
         // eat sign char, if present
@@ -297,63 +288,62 @@ TOKEN number (TOKEN tok) {
         if(c == '+')
             getchar();
         else if(c == '-'){
-            expSignFlag = 1;
+            sign = 1;
             getchar();
         }
         
         // reset and reuse flags
-        nonZeroFlag = 0;
-        sigDigCounter = 0;
+        zero_flag = 0;
+        sig_dig = 0;
         
         // get exponent value
-        while ( (c = peekchar()) != EOF
-            && CHARCLASS[c] == NUMERIC)
-        {   
+        while ((c = peekchar()) != EOF && CHARCLASS[c] == NUMERIC) {  
             c = getchar();
             charval = (c - '0');
             if(charval != 0)
-                nonZeroFlag = 1;
+                zero_flag = 1;
                                                        // need to check for overflow!!!!
-            if(nonZeroFlag == 1){
-                ++sigDigCounter;     // not used after this point!!!!
-                expVal = expVal * 10 + charval;
+            if(zero_flag == 1){
+                ++sig_dig ;     // not used after this point!!!!
+                expo_num = expo_num * 10 + charval;
             }
         }
         // produce net exponent value
-        if(expVal < 0)
-            floatErrorFlag = 1;
-        if(expSignFlag == 1)
-            expVal = -expVal;
+        if(expo_num < 0)
+            exp_flag = 1;
+        if(sign == 1)
+            expo_num = -expo_num;
     }
     
+    //assignment(tok, real_flag, expo_num, first_sig, double_num, long_num)
     // final error checking and token assignment
     tok->tokentype = NUMBERTOK;
-    if(realNumFlag == 1){
-        expVal += firstSigDigLoc; // net expVal
+    if(real_flag == 1){
+        expo_num += first_sig; // net expo_num
         
-        if(expVal > 38 || expVal < -38 ||  floatErrorFlag == 1)
-        {
-            dnum = 0;
+        if(expo_num > 38 || expo_num < -38 ||  exp_flag == 1) {
+            double_num = 0;
             printf("Floating number out of range\n");
-        }else{
-            if(expVal > 0)
-                dnum *= pdcl[expVal];
-            else if(expVal < 0){
-                int i = 0;
-                for(; i > expVal; i--)
-                    dnum *= .1;
+        }
+        else{
+            if(expo_num > 0)
+                double_num = double_num * pos_dec[expo_num];
+            else if(expo_num < 0){
+
+                for(i = 0; i > expo_num; i--)
+                    double_num = double_num * 0.1;
             }
         }
         tok->datatype = REAL;
-        tok->realval = dnum;
-    }else{
-        if(intErrorFlag == 1)
-        {
-            lnum = 0;
+        tok->realval = double_num;
+    }
+    else {
+        if(int_flag == 1) {
+            long_num = 0;
             printf("Integer number out of range\n");
         }
         tok->datatype = INTEGER;
-        tok->intval = lnum;
+        tok->intval = long_num;
     }
 return (tok);
   }
@@ -379,4 +369,39 @@ int check (char * arg, int opp) {
       }
     }
   return -1;
+}
+
+//helper method for number to get exponent
+TOKEN assignment(TOKEN tok, int real_flag, int expo_num, int first_sig, double double_num, long long_num, int exp_flag) {
+    // // final error checking and token assignment
+
+
+    // tok->tokentype = NUMBERTOK;
+    // if(real_flag == 1){
+    //     expo_num += first_sig; // net expo_num
+        
+    //     if(expo_num > 38 || expo_num < -38 ||  exp_flag == 1) {
+    //         double_num = 0;
+    //         printf("Floating number out of range\n");
+    //     }
+    //     else{
+    //         if(expo_num > 0)
+    //             double_num *= pos_dec[expo_num];
+    //         else if(expo_num < 0){
+
+    //             for(i = 0; i > expo_num; i--)
+    //                 double_num = (double_num * 0.1);
+    //         }
+    //     }
+    //     tok->datatype = REAL;
+    //     tok->realval = double_num;
+    // }
+    // else{
+    //     if(int_flag == 1) {
+    //         long_num = 0;
+    //         printf("Integer number out of range\n");
+    //     }
+    //     tok->datatype = INTEGER;
+    //     tok->intval = long_num;
+    // }
 }

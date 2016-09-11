@@ -43,3 +43,4 @@ TOKEN getstring (TOKEN tok);
 TOKEN special (TOKEN tok);
 TOKEN number (TOKEN tok);
 int check (char *arg, int opp);
+TOKEN assignment(TOKEN tok, int real_flag, int expo_num, int first_sig, double double_num, long long_num, int expo_flag);
