@@ -49,7 +49,6 @@ void skipblanks ()
   {  int c;
      int cc;
      int comp;
-	int done = 0;
 
     while ((c = peekchar()) != EOF && (c == ' ' || c == '\n' || c == '\t' ||
       c == '{' || (c == '(' && ((cc = peek2char()) == '*')))){
@@ -57,18 +56,12 @@ void skipblanks ()
 	     if(c == '{')
         while(c = peekchar() != '}') 
 			      getchar();
-       //handeling (* *) comment type
-	if(c == '(' && cc == '*'){
-        	getchar();
-		while(!done) {
-			getchar();
-			if(peek2char() == ')' && (peekchar() == '*')){
-		     		getchar();
-				done = 1;
-			}
+       //handeling (* *) comment type	
+		   else if(c == '(' && cc == '*'){
+         getchar();
+		     while(cc = peek2char() != ')' && (c = peekchar() != '*')) 
+		     	getchar();
 	     	comp = 1;
-			}
-		done = 0;
 	      }
         //move past * at end of (* *)
         if(comp)
@@ -172,16 +165,16 @@ TOKEN special (TOKEN tok)
 		spec[2] = 0;
 		spec[1] = cc;
 		spec[0] = c;
-	//	printf("spec[0] = %c, spec[1] = %c\n", spec[0] ,spec[1]);
+		printf("spec[0] = %c, spec[1] = %c\n", spec[0] ,spec[1]);
 	}
 
         if((which = check(spec, 1)) >= 0){
-         // printf("is an op %d\n", which);
+          printf("is an op %d\n", which);
           tok->tokentype = OPERATOR;
           tok->whichval = which;
         }
         else if((which = check(spec, 2)) >= 0) {
-           // printf("is a delim %d\n", which);
+            printf("is a delim %d\n", which);
             tok->tokentype = DELIMITER;
             tok->whichval = which;
     }
@@ -192,13 +185,12 @@ TOKEN number (TOKEN tok)
   { long num;
     int  c, charval;
     num = 0;
-
-    while ( (c = peekchar()) != EOF && CHARCLASS[c] == NUMERIC){
-	  c = getchar();
+    while ( (c = peekchar()) != EOF
+            && CHARCLASS[c] == NUMERIC)
+      {   c = getchar();
           charval = (c - '0');
           num = num * 10 + charval;
         }
-
     tok->tokentype = NUMBERTOK;
     tok->datatype = INTEGER;
     tok->intval = num;
@@ -208,7 +200,7 @@ TOKEN number (TOKEN tok)
 //helper method to compare input to operators, delimiters and reserved words
 int check (char * arg, int opp) {
   int index = 0;
-  int size = 28;
+  int size = 2                
   char ** look = reserve;
   if(opp == 1) {
     size = 19;
@@ -219,9 +211,9 @@ int check (char * arg, int opp) {
     look = dilimiters;
   }
   for(index; index < size; index++) {
-   // printf("checking shit %c \n", *look[index]);
+    printf("checking shit %c \n", *look[index]);
     if(strcmp(arg, look[index]) == 0) {
-       // printf("returning %d\n", index + 1);
+        printf("returning %d\n", index + 1);
         return (index + 1);
       }
     }
