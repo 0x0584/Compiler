@@ -1,7 +1,6 @@
-/* lexanc.c         14 Feb 01; 31 May 12       */
+//John Thomas jtt767
 
-/* This file contains code stubs for the lexical analyzer.
-   Rename this file to be lexanc.c and fill in the stubs.    */
+/* lexanc.c         14 Feb 01; 31 May 12       */
 
 /* Copyright (c) 2001 Gordon S. Novak Jr. and
    The University of Texas at Austin. */
@@ -39,11 +38,11 @@ char *reserve[] = {"array", "begin", "case", "const", "do", "downto",
   "to", "type", "until", "var", "while", "with"};
 
 //negative decimal conversion list and initialization flag
-double neg_dec[100];
+double neg_dec[80];
 int neg_init = 0;
 
 //positive decimal conversion list and initialization flag
-double pos_dec[100]; 
+double pos_dec[80]; 
 int pos_init = 0;
 
 /* Skip blanks and whitespace.  Expand this function to skip comments too. */
@@ -281,35 +280,24 @@ int check(char * arg, int opp) {
 //loops through all numbers before decimal or exponent if 0
 int check_number(int exponent, int *charval, int *c, int *zero_flag, 
   int *sig_dig, int *exponent_num, long *long_num, double *double_num) {
-  if (exponent) {
-    //checking if number has an exponent and setting flags
-    while ((*c = peekchar()) != EOF && CHARCLASS[*c] == NUMERIC) {  
+      while ((*c = peekchar()) != EOF && CHARCLASS[*c] == NUMERIC) {  
       *c = getchar();
       *charval = (*c - '0');
       if(*charval != 0)
         *zero_flag = 1;
-       if(*zero_flag == 1){
-           (*sig_dig)++;  
-           *exponent_num = *exponent_num * 10 + *charval;
-         }
-       }
-   }
-    else {
-      //checking all numbers up to decimal or e
-      while ((*c = peekchar()) != EOF && CHARCLASS[*c] == NUMERIC) {   
-        *c = getchar();
-        *charval = (*c - '0');
-        if(*charval != 0)
-           *zero_flag = 1;
+      if (!exponent)
         *long_num = *long_num * 10 + *charval;
-        if(*zero_flag == 1) {
-           if(*sig_dig >= 8)
+       if(*zero_flag == 1){
+          if(!exponent) {
+            if(*sig_dig >= 8)
              *charval = 0;
            *double_num = (*double_num * 10) + *charval;
-           (*sig_dig)++;
+          }
+           (*sig_dig)++;  
+           if (exponent)
+            *exponent_num = *exponent_num * 10 + *charval;
          }
-      } 
-    }
+       }
  }
 
 //helper method for number to check if our number has a decimal and set flags accordingly
@@ -392,7 +380,7 @@ int create_table(int neg_table) {
     pos_dec[0] = 1;
     mult = 10;
   }
-  for (i = 1; i < 100; i++){
+  for (i = 1; i < 80; i++){
     if (neg_table) 
       neg_dec[i] = (neg_dec[i - 1] * mult);
     else

@@ -1,3 +1,6 @@
+//John Thomas jtt767
+//added declarations of helper functions
+
 /* lexan.h            Gordon S. Novak Jr.           09 Feb 01 */
 
 /* Definitions for lexical analyzer */
