@@ -43,4 +43,11 @@ TOKEN getstring (TOKEN tok);
 TOKEN special (TOKEN tok);
 TOKEN number (TOKEN tok);
 int check (char *arg, int opp);
-TOKEN assignment(TOKEN tok, int real_flag, int expo_num, int first_sig, double double_num, long long_num, int expo_flag);
+int check_number(int exponent, int *charval, int *c, int *zero_flag, 
+  int *sig_dig, int *exponent_num, long *long_num, double *double_num);
+int check_decimal(int *c, int *zero_flag, int *sig_dig, double *double_charval, 
+  int *real_flag, double *double_num, int *first_sig);
+TOKEN error_checker(TOKEN tok, int real_flag, int exponent_num, 
+  double double_num, int sig_dig, long long_num, int first_sig, int exp_flag);
+int create_table(int neg_table);
+void printer(int print);
