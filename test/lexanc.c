@@ -173,15 +173,12 @@ TOKEN special (TOKEN tok) {
 		spec[2] = 0;
 		spec[1] = cc;
 		spec[0] = c;
-	//	printf("spec[0] = %c, spec[1] = %c\n", spec[0] ,spec[1]);
 	}
   if((which = check(spec, 1)) >= 0){
-   // printf("is an op %d\n", which);
     tok->tokentype = OPERATOR;
     tok->whichval = which;
   }
   else if((which = check(spec, 2)) >= 0) {
-     // printf("is a delim %d\n", which);
       tok->tokentype = DELIMITER;
       tok->whichval = which;
     }
@@ -357,7 +354,6 @@ TOKEN error_checker(TOKEN tok, int real_flag, int exponent_num,
     tok->datatype = INTEGER;
     if(long_num > 2147483647 || sig_dig  > 10 || long_num < 0) {
        //need to truncate integer out of range
-       // printf("run 3 : long_num = %ld double_num = %f\n", long_num, double_num);
        int truncate = sig_dig - 9;
        for(i = 1; i <= truncate; i++)
           long_num = long_num / 10;
