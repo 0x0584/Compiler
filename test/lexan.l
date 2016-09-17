@@ -37,6 +37,7 @@
 int maketoken(int type, int which);
 int install_id();
 int install_fnum();
+int install_inum();
 int yywrap();
 
 /* If the lex yytext buffer turns out to be too small to hold comments,
@@ -57,8 +58,13 @@ letter   [A-Za-z]
 digit    [0-9]
 id       {letter}({letter}|{digit})*
 fnumber  {digit}+(\.{digit}+)?(E[+\-]?{digit}+)?
+inumber  {digit}+
 
 %%
+
+{ws}      { /* no action and no return */ }
+"(*".*?"*)" {/*this is a comment bitch "*/ }
+"{"[^}]*?"}"     {/*so is this bitch*/}
 
 array     {return(maketoken(RESERVED, ARRAY));}
 begin     {return(maketoken(RESERVED, BEGINBEGIN));}
@@ -68,7 +74,7 @@ do        {return(maketoken(RESERVED, DO));}
 downto    {return(maketoken(RESERVED, DOWNTO));}
 else      {return(maketoken(RESERVED, ELSE));}
 end       {return(maketoken(RESERVED, END));}
-file      {return(maketoken(RESERVED, FILE));}
+file      {return(maketoken(RESERVED, FILEFILE));}
 for       {return(maketoken(RESERVED, FOR));}
 function  {return(maketoken(RESERVED, FUNCTION));}
 goto      {return(maketoken(RESERVED, GOTO));}
@@ -89,6 +95,17 @@ var       {return(maketoken(RESERVED, VAR));}
 while     {return(maketoken(RESERVED, WHILE));}
 with      {return(maketoken(RESERVED, WITH));}
 
+and       {return(maketoken(OPERATOR, AND));}
+or        {return(maketoken(OPERATOR, OR));}
+not       {return(maketoken(OPERATOR, NOT));}
+div       {return(maketoken(OPERATOR, DIV));}
+mod       {return(maketoken(OPERATOR, MOD));}
+in        {return(maketoken(OPERATOR, IN));}
+
+{id}      {return(install_id());}
+{inumber} {return(install_inum());}
+{fnumber} {return(install_fnum());}
+
 ","       {return(maketoken(DELIMITER, COMMA));}
 ";"       {return(maketoken(DELIMITER, SEMICOLON));}
 ":"       {return(maketoken(DELIMITER, COLON));}
@@ -98,16 +115,18 @@ with      {return(maketoken(RESERVED, WITH));}
 "]"       {return(maketoken(DELIMITER, RBRACKET));}
 ".."      {return(maketoken(DELIMITER, DOTDOT));}
 
-{ws}      { /* no action and no return */ }
-{id}      {return(install_id());}
-{fnumber} {return(install_fnum());}
-"<"       {return(maketoken(OPERATOR, LT));}
-"<="      {return(maketoken(OPERATOR, LE));}
+"+"       {return(maketoken(OPERATOR, PLUS));}
+"-"       {return(maketoken(OPERATOR, MINUS));}
+"*"       {return(maketoken(OPERATOR, TIMES));}
+"/"       {return(maketoken(OPERATOR, DIVIDE));}
+":="      {return(maketoken(OPERATOR, ASSIGN));}
 "="       {return(maketoken(OPERATOR, EQ));}
 "<>"      {return(maketoken(OPERATOR, NE));}
-">"       {return(maketoken(OPERATOR, GT));}
+"<"       {return(maketoken(OPERATOR, LT));}
+"<="      {return(maketoken(OPERATOR, LE));}
 ">="      {return(maketoken(OPERATOR, GE));}
-":="      {return(maketoken(OPERATOR, ASSIGN));}
+">"       {return(maketoken(OPERATOR, GT));}
+"^"       {return(maketoken(OPERATOR, POINT));}
 "."       {return(maketoken(OPERATOR, DOT));}
 
 %%
@@ -156,6 +175,17 @@ int install_fnum() {  /* Note -- you may use sscanf for this assignment. */
        /* printf("num %10s   n = %4d\n",yytext,yyleng); */
   sscanf(yytext, "%f", &fnum);
   yylval->realval = fnum;
+  return(NUMBER);
+ }
+
+ int install_inum() {
+  int inum;
+  yylval = (TOKEN) talloc();  /* Makes new token and sets yylval to point to it */
+  yylval->tokentype = NUMBERTOK; 
+  yylval->datatype = INTEGER;
+  /*printf("num %10s   n = %4d\n", yytext, yyleng);*/ 
+  sscanf(yytext, "%d", &inum);
+  yylval->intval = inum;
   return(NUMBER);
  }
 
