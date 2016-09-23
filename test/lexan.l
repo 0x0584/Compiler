@@ -1,5 +1,7 @@
 %{    /* lex2.l -- partial lex specification for Pascal    22 Jul 13 */
 
+/*John Thomas jtt767*/
+
 /* Copyright (c) 2013 Gordon S. Novak Jr. and The University of Texas at Austin
    */
 
@@ -36,6 +38,7 @@
 
 int maketoken(int type, int which);
 int install_id();
+int install_string();
 int install_fnum();
 int install_inum();
 int yywrap();
@@ -57,14 +60,31 @@ ws       {delim}+
 letter   [A-Za-z]
 digit    [0-9]
 id       {letter}({letter}|{digit})*
+
+string      \'.*\'
+
 fnumber  {digit}+(\.{digit}+)?(E[+\-]?{digit}+)?
 inumber  {digit}+
+fnum     [+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?
 
 %%
 
 {ws}      { /* no action and no return */ }
-"(*".*?"*)" {/*this is a comment bitch "*/ }
-"{"[^}]*?"}"     {/*so is this bitch*/}
+
+"(*"      {
+          loop:
+          while (input() != '*');
+          switch (input())
+          {
+          case ')': break;
+          case '*': unput('*');
+          default: goto loop;
+          }
+          }
+
+"{"       {
+          while (input() != '}');
+          }
 
 array     {return(maketoken(RESERVED, ARRAY));}
 begin     {return(maketoken(RESERVED, BEGINBEGIN));}
@@ -90,7 +110,8 @@ repeat    {return(maketoken(RESERVED, REPEAT));}
 set       {return(maketoken(RESERVED, SET));}
 then      {return(maketoken(RESERVED, THEN));}
 to        {return(maketoken(RESERVED, TO));}
-type      {return(maketoken(RESERVED, UNTIL));}
+type      {return(maketoken(RESERVED, TYPE));}
+until      {return(maketoken(RESERVED, UNTIL));}
 var       {return(maketoken(RESERVED, VAR));}
 while     {return(maketoken(RESERVED, WHILE));}
 with      {return(maketoken(RESERVED, WITH));}
@@ -105,6 +126,7 @@ in        {return(maketoken(OPERATOR, IN));}
 {id}      {return(install_id());}
 {inumber} {return(install_inum());}
 {fnumber} {return(install_fnum());}
+{fnum}    {return(install_fnum());}
 
 ","       {return(maketoken(DELIMITER, COMMA));}
 ";"       {return(maketoken(DELIMITER, SEMICOLON));}
@@ -129,6 +151,8 @@ in        {return(maketoken(OPERATOR, IN));}
 "^"       {return(maketoken(OPERATOR, POINT));}
 "."       {return(maketoken(OPERATOR, DOT));}
 
+{string}     {return(install_string());}
+
 %%
 
 /* Note that lex always returns two values:
@@ -141,15 +165,41 @@ int maketoken(int type, int which)
   {
   yylval = (TOKEN) talloc();  /* Make new token, set yylval to point to it */
   yylval->tokentype = type;
-  if (type == RESERVED)
-     yylval->whichval = which - RESERVED_BIAS;
-     else if (type == OPERATOR)
-             yylval->whichval = which - OPERATOR_BIAS;
-             else if (type == DELIMITER)
-                     yylval->whichval = which - DELIMITER_BIAS;
-                     else yylval->whichval = which;
+  if (type == RESERVED) 
+    yylval->whichval = which - RESERVED_BIAS;
+  else if (type == OPERATOR)
+    yylval->whichval = which - OPERATOR_BIAS;
+  else if (type == DELIMITER)
+    yylval->whichval = which - DELIMITER_BIAS;
+  else yylval->whichval = which;
   return(which);
   }
+
+int install_string() {
+  int index = 1;
+  int good = 1;
+  int length = yyleng;
+  int counter = 0;
+
+  yylval = talloc();
+  
+  for(index = 1; index < length && good; index++){
+    yylval->stringval[counter] = yytext[index];
+    counter++;
+    if ((char)yytext[index] == '\'')
+      index++;
+    if (counter >= 15)
+      good = 0;
+  }
+
+  if (length > 18) 
+    yylval->stringval[counter] = '\0';
+  else 
+    yylval->stringval[counter - 1] = '\0';
+  
+  yylval->tokentype = STRINGTOK;
+  return STRING;
+}
 
 int install_id()
  { int i, c, n;
@@ -168,13 +218,29 @@ int install_id()
  }
 
 int install_fnum() {  /* Note -- you may use sscanf for this assignment. */
-  float fnum;
+  int index;
+  int floating;
+  int int_num;
+  float float_num;
   yylval = (TOKEN) talloc();   /* Make new token, set yylval to point to it */
   yylval->tokentype = NUMBERTOK;
-  yylval->datatype = REAL;
-       /* printf("num %10s   n = %4d\n",yytext,yyleng); */
-  sscanf(yytext, "%f", &fnum);
-  yylval->realval = fnum;
+
+  while(index < yyleng && !floating) { 
+    if(yytext[index] == 'e' || yytext[index] == '.') 
+      floating = 1;
+      index++;
+    }
+
+  if(!floating) {
+    sscanf(yytext, "%d", &int_num);
+    yylval->realval = float_num;
+    yylval->datatype = INTEGER;
+  }
+  else {
+    sscanf(yytext, "%f", &float_num);
+    yylval->realval = float_num;
+    yylval->datatype = REAL;
+  }
   return(NUMBER);
  }
 
