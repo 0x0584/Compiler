@@ -123,7 +123,7 @@
 TOKEN parseresult;
 
 
-#line 127 "y.tab.c" /* yacc.c:339  */
+#line 127 "pars1.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -293,7 +293,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 297 "y.tab.c" /* yacc.c:358  */
+#line 297 "pars1.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -1397,71 +1397,71 @@ yyreduce:
         case 2:
 #line 80 "pars1.y" /* yacc.c:1646  */
     { parseresult = (yyvsp[-1]); }
-#line 1401 "y.tab.c" /* yacc.c:1646  */
+#line 1401 "pars1.tab.c" /* yacc.c:1646  */
     break;
 
   case 3:
 #line 83 "pars1.y" /* yacc.c:1646  */
     { (yyval) = makeprogn((yyvsp[-2]),cons((yyvsp[-1]), (yyvsp[0]))); }
-#line 1407 "y.tab.c" /* yacc.c:1646  */
+#line 1407 "pars1.tab.c" /* yacc.c:1646  */
     break;
 
   case 4:
 #line 84 "pars1.y" /* yacc.c:1646  */
     { (yyval) = makeif((yyvsp[-4]), (yyvsp[-3]), (yyvsp[-1]), (yyvsp[0])); }
-#line 1413 "y.tab.c" /* yacc.c:1646  */
+#line 1413 "pars1.tab.c" /* yacc.c:1646  */
     break;
 
   case 6:
 #line 87 "pars1.y" /* yacc.c:1646  */
     { (yyval) = cons((yyvsp[-1]), (yyvsp[0])); }
-#line 1419 "y.tab.c" /* yacc.c:1646  */
+#line 1419 "pars1.tab.c" /* yacc.c:1646  */
     break;
 
   case 7:
 #line 88 "pars1.y" /* yacc.c:1646  */
     { (yyval) = NULL; }
-#line 1425 "y.tab.c" /* yacc.c:1646  */
+#line 1425 "pars1.tab.c" /* yacc.c:1646  */
     break;
 
   case 8:
 #line 90 "pars1.y" /* yacc.c:1646  */
     { (yyval) = (yyvsp[0]); }
-#line 1431 "y.tab.c" /* yacc.c:1646  */
+#line 1431 "pars1.tab.c" /* yacc.c:1646  */
     break;
 
   case 9:
 #line 91 "pars1.y" /* yacc.c:1646  */
     { (yyval) = NULL; }
-#line 1437 "y.tab.c" /* yacc.c:1646  */
+#line 1437 "pars1.tab.c" /* yacc.c:1646  */
     break;
 
   case 10:
 #line 93 "pars1.y" /* yacc.c:1646  */
     { (yyval) = binop((yyvsp[-1]), (yyvsp[-2]), (yyvsp[0])); }
-#line 1443 "y.tab.c" /* yacc.c:1646  */
+#line 1443 "pars1.tab.c" /* yacc.c:1646  */
     break;
 
   case 11:
 #line 95 "pars1.y" /* yacc.c:1646  */
     { (yyval) = binop((yyvsp[-1]), (yyvsp[-2]), (yyvsp[0])); }
-#line 1449 "y.tab.c" /* yacc.c:1646  */
+#line 1449 "pars1.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
 #line 98 "pars1.y" /* yacc.c:1646  */
     { (yyval) = binop((yyvsp[-1]), (yyvsp[-2]), (yyvsp[0])); }
-#line 1455 "y.tab.c" /* yacc.c:1646  */
+#line 1455 "pars1.tab.c" /* yacc.c:1646  */
     break;
 
   case 15:
 #line 101 "pars1.y" /* yacc.c:1646  */
     { (yyval) = (yyvsp[-1]); }
-#line 1461 "y.tab.c" /* yacc.c:1646  */
+#line 1461 "pars1.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1465 "y.tab.c" /* yacc.c:1646  */
+#line 1465 "pars1.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires

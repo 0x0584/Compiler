@@ -218,30 +218,23 @@ int install_id()
  }
 
 int install_fnum() {  /* Note -- you may use sscanf for this assignment. */
-  int index;
-  int floating;
-  int int_num;
-  float float_num;
-  yylval = (TOKEN) talloc();   /* Make new token, set yylval to point to it */
-  yylval->tokentype = NUMBERTOK;
+    float float_num = 0;
+    int index = 0;
+    int floating = 0;
+    int length = yyleng;
 
-  while(index < yyleng && !floating) { 
-    if(yytext[index] == 'e' || yytext[index] == '.') 
-      floating = 1;
+    yylval = (TOKEN) talloc();   /* Make new token, set yylval to point to it */
+    yylval->tokentype = NUMBERTOK;
+
+    while (index < length && !floating) {
+      if (yytext[index] == 'e' || yytext[index] == '.')
+        floating = 1;
       index++;
     }
-
-  if(!floating) {
-    sscanf(yytext, "%d", &int_num);
-    yylval->realval = float_num;
-    yylval->datatype = INTEGER;
-  }
-  else {
     sscanf(yytext, "%f", &float_num);
-    yylval->realval = float_num;
     yylval->datatype = REAL;
-  }
-  return(NUMBER);
+    yylval->realval = float_num;
+    return(NUMBER);
  }
 
  int install_inum() {
