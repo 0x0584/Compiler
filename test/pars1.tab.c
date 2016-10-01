@@ -596,8 +596,8 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    80,    80,    82,    84,    85,    87,    88,    90,    91,
-      93,    95,    96,    98,    99,   101,   102,   103
+       0,    80,    80,    82,    83,    84,    86,    87,    89,    90,
+      92,    94,    95,    97,    98,   100,   101,   102
 };
 #endif
 
@@ -1401,61 +1401,61 @@ yyreduce:
     break;
 
   case 3:
-#line 83 "pars1.y" /* yacc.c:1646  */
+#line 82 "pars1.y" /* yacc.c:1646  */
     { (yyval) = makeprogn((yyvsp[-2]),cons((yyvsp[-1]), (yyvsp[0]))); }
 #line 1407 "pars1.tab.c" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 84 "pars1.y" /* yacc.c:1646  */
+#line 83 "pars1.y" /* yacc.c:1646  */
     { (yyval) = makeif((yyvsp[-4]), (yyvsp[-3]), (yyvsp[-1]), (yyvsp[0])); }
 #line 1413 "pars1.tab.c" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 87 "pars1.y" /* yacc.c:1646  */
+#line 86 "pars1.y" /* yacc.c:1646  */
     { (yyval) = cons((yyvsp[-1]), (yyvsp[0])); }
 #line 1419 "pars1.tab.c" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 88 "pars1.y" /* yacc.c:1646  */
+#line 87 "pars1.y" /* yacc.c:1646  */
     { (yyval) = NULL; }
 #line 1425 "pars1.tab.c" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 90 "pars1.y" /* yacc.c:1646  */
+#line 89 "pars1.y" /* yacc.c:1646  */
     { (yyval) = (yyvsp[0]); }
 #line 1431 "pars1.tab.c" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 91 "pars1.y" /* yacc.c:1646  */
+#line 90 "pars1.y" /* yacc.c:1646  */
     { (yyval) = NULL; }
 #line 1437 "pars1.tab.c" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 93 "pars1.y" /* yacc.c:1646  */
+#line 92 "pars1.y" /* yacc.c:1646  */
     { (yyval) = binop((yyvsp[-1]), (yyvsp[-2]), (yyvsp[0])); }
 #line 1443 "pars1.tab.c" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 95 "pars1.y" /* yacc.c:1646  */
+#line 94 "pars1.y" /* yacc.c:1646  */
     { (yyval) = binop((yyvsp[-1]), (yyvsp[-2]), (yyvsp[0])); }
 #line 1449 "pars1.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 98 "pars1.y" /* yacc.c:1646  */
+#line 97 "pars1.y" /* yacc.c:1646  */
     { (yyval) = binop((yyvsp[-1]), (yyvsp[-2]), (yyvsp[0])); }
 #line 1455 "pars1.tab.c" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 101 "pars1.y" /* yacc.c:1646  */
+#line 100 "pars1.y" /* yacc.c:1646  */
     { (yyval) = (yyvsp[-1]); }
 #line 1461 "pars1.tab.c" /* yacc.c:1646  */
     break;
@@ -1689,7 +1689,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 106 "pars1.y" /* yacc.c:1906  */
+#line 112 "pars1.y" /* yacc.c:1906  */
 
 
 /* You should add your own debugging flags below, and add debugging
@@ -1711,7 +1711,8 @@ yyreturn:
    /*  Note: you should add to the above values and insert debugging
        printouts in your routines similar to those that are shown here.     */
 
-TOKEN cons(TOKEN item, TOKEN list)           /* add item to front of list */
+/* add item to front of list */
+TOKEN cons(TOKEN item, TOKEN list)          
   { item->link = list;
     if (DEBUG & DB_CONS)
        { printf("cons\n");
@@ -1721,7 +1722,8 @@ TOKEN cons(TOKEN item, TOKEN list)           /* add item to front of list */
     return item;
   }
 
-TOKEN binop(TOKEN op, TOKEN lhs, TOKEN rhs)        /* reduce binary operator */
+/* reduce binary operator */
+TOKEN binop(TOKEN op, TOKEN lhs, TOKEN rhs)        
   { op->operands = lhs;          /* link operands to operator       */
     lhs->link = rhs;             /* link second operand to first    */
     rhs->link = NULL;            /* terminate operand list          */
@@ -1770,6 +1772,69 @@ yyerror(s)
   char * s;
   { 
   fputs(s,stderr); putc('\n',stderr);
+  }
+
+/* identifies a type in the symbol table and sets its symtype
+pointer to its symbol table type */
+TOKEN idtype(TOKEN tok){
+  int tok_datatype = tok->datatype;
+  if(tok_datatype == BOOLETYPE)
+    tok->symtype = searchst("boolean");
+  else if(tok_datatype == INTEGER)
+    tok->symtype = searchst("integer");
+  else if(tok_datatype == REAL)
+    tok->symtype = searchst("real");
+  else 
+    tok->symtype = searchst(tok->stringval);
+  return tok;
+ } 
+
+/* findid finds an identifier in the symbol table and sets up
+the symbol table pointers */
+/* taken from lecture notes pg 127 */
+TOKEN findid(TOKEN tok) { /* the ID token */
+  { SYMBOL sym, typ;
+    sym = searchst(tok->stringval);
+    tok->symentry = sym;
+    typ = sym->datatype;
+    tok->symtype = typ;
+
+    if ( typ->kind == BASICTYPE || typ->kind == POINTERSYM)
+      tok->datatype = typ->basicdt;
+    else if(sym->kind == CONSTSYM) {
+      if (sym->basicdt == REAL) {
+        tok->tokentype = NUMBERTOK;
+        tok->datatype = REAL;
+        tok->realval = sym->constval.realnum;
+      }
+      else if (sym->basicdt == INTEGER) {
+        tok->tokentype = NUMBERTOK;
+        tok->datatype = INTEGER;
+        tok->intval = sym->constval.intnum;
+        }
+      }
+    }
+    return tok;
+  }
+
+
+/* install variables in symbol table */
+/* taken from lecture notes pg 133 */
+void instvars(TOKEN idlist, TOKEN typetok)
+  { SYMBOL sym, typesym; int align;
+    typesym = typetok->symtype;
+    align = alignsize(typesym);
+    while ( idlist != NULL )   /* for each id */
+      {  sym = insertsym(idlist->stringval);
+         sym->kind = VARSYM;
+         sym->offset = wordaddress(blockoffs[blocknumber], align);
+         sym->size = typesym->size;
+
+         blockoffs[blocknumber] = sym->offset + sym->size;
+         sym->datatype = typesym;
+         sym->basicdt = typesym->basicdt;
+         idlist = idlist->link;
+      };
   }
 
 main()

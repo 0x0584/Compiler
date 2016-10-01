@@ -79,8 +79,7 @@ TOKEN parseresult;
 
   program    :  statement DOT                  { parseresult = $1; }
              ;
-  statement  :  BEGINBEGIN statement endpart
-                                       { $$ = makeprogn($1,cons($2, $3)); }
+  statement  :  BEGINBEGIN statement endpart   { $$ = makeprogn($1,cons($2, $3)); }
              |  IF expr THEN statement endif   { $$ = makeif($1, $2, $4, $5); }
              |  assignment
              ;
@@ -101,6 +100,13 @@ TOKEN parseresult;
   factor     :  LPAREN expr RPAREN             { $$ = $2; }
              |  IDENTIFIER
              |  NUMBER
+             ;
+  instvars   :  idvar COLON type              { instvars($1, idtype($3)); }
+             ; 
+  idvar      :  idvar COMMA IDENTIFIER        { $$ = cons($3, $1); }
+             |  IDENTIFIER                    { $$ = $1; }
+             ;
+  type       :  IDENTIFIER                    { $$ = $1; }
              ;
 
 %%
@@ -124,7 +130,8 @@ TOKEN parseresult;
    /*  Note: you should add to the above values and insert debugging
        printouts in your routines similar to those that are shown here.     */
 
-TOKEN cons(TOKEN item, TOKEN list)           /* add item to front of list */
+/* add item to front of list */
+TOKEN cons(TOKEN item, TOKEN list)          
   { item->link = list;
     if (DEBUG & DB_CONS)
        { printf("cons\n");
@@ -134,7 +141,8 @@ TOKEN cons(TOKEN item, TOKEN list)           /* add item to front of list */
     return item;
   }
 
-TOKEN binop(TOKEN op, TOKEN lhs, TOKEN rhs)        /* reduce binary operator */
+/* reduce binary operator */
+TOKEN binop(TOKEN op, TOKEN lhs, TOKEN rhs)        
   { op->operands = lhs;          /* link operands to operator       */
     lhs->link = rhs;             /* link second operand to first    */
     rhs->link = NULL;            /* terminate operand list          */
@@ -183,6 +191,69 @@ yyerror(s)
   char * s;
   { 
   fputs(s,stderr); putc('\n',stderr);
+  }
+
+/* identifies a type in the symbol table and sets its symtype
+pointer to its symbol table type */
+TOKEN idtype(TOKEN tok){
+  int tok_datatype = tok->datatype;
+  if(tok_datatype == BOOLETYPE)
+    tok->symtype = searchst("boolean");
+  else if(tok_datatype == INTEGER)
+    tok->symtype = searchst("integer");
+  else if(tok_datatype == REAL)
+    tok->symtype = searchst("real");
+  else 
+    tok->symtype = searchst(tok->stringval);
+  return tok;
+ } 
+
+/* findid finds an identifier in the symbol table and sets up
+the symbol table pointers */
+/* taken from lecture notes pg 127 */
+TOKEN findid(TOKEN tok) { /* the ID token */
+  { SYMBOL sym, typ;
+    sym = searchst(tok->stringval);
+    tok->symentry = sym;
+    typ = sym->datatype;
+    tok->symtype = typ;
+
+    if ( typ->kind == BASICTYPE || typ->kind == POINTERSYM)
+      tok->datatype = typ->basicdt;
+    else if(sym->kind == CONSTSYM) {
+      if (sym->basicdt == REAL) {
+        tok->tokentype = NUMBERTOK;
+        tok->datatype = REAL;
+        tok->realval = sym->constval.realnum;
+      }
+      else if (sym->basicdt == INTEGER) {
+        tok->tokentype = NUMBERTOK;
+        tok->datatype = INTEGER;
+        tok->intval = sym->constval.intnum;
+        }
+      }
+    }
+    return tok;
+  }
+
+
+/* install variables in symbol table */
+/* taken from lecture notes pg 133 */
+void instvars(TOKEN idlist, TOKEN typetok)
+  { SYMBOL sym, typesym; int align;
+    typesym = typetok->symtype;
+    align = alignsize(typesym);
+    while ( idlist != NULL )   /* for each id */
+      {  sym = insertsym(idlist->stringval);
+         sym->kind = VARSYM;
+         sym->offset = wordaddress(blockoffs[blocknumber], align);
+         sym->size = typesym->size;
+
+         blockoffs[blocknumber] = sym->offset + sym->size;
+         sym->datatype = typesym;
+         sym->basicdt = typesym->basicdt;
+         idlist = idlist->link;
+      };
   }
 
 main()
