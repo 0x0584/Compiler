@@ -1,4 +1,11 @@
-%{     /* pars1.y    Pascal Parser      Gordon S. Novak Jr.  ; 30 Jul 13   */
+%{     
+
+/*
+  John Thomas
+  jtt767
+*/
+
+/* pars1.y    Pascal Parser      Gordon S. Novak Jr.  ; 30 Jul 13   */
 /* Copyright (c) 2013 Gordon S. Novak Jr. and
    The University of Texas at Austin. */
 /* 14 Feb 01; 01 Oct 04; 02 Mar 07; 27 Feb 08; 24 Jul 09; 02 Aug 12 */
@@ -68,8 +75,8 @@ TOKEN parseresult;
   vars       : VAR varLayout                      
              | CONST layout vars                 
              ;          
-  varLayout  : varname COLON type SEMICOLON    { instvars($1, $3); }               
-             | varname COLON type SEMICOLON varLayout       { instvars($1, $3); }
+  varLayout  : varLine SEMICOLON          
+             | varLine SEMICOLON varLayout       
              ;
   varname    : type COMMA varname              { $$ = cons($1, $3); }
              | type                   
@@ -78,6 +85,7 @@ TOKEN parseresult;
              ;
   type       : IDENTIFIER                      { $$ = findtype($1);}
              ;
+  varLine    :  varname COLON type             { instvars($1, $3); }
  //get loop and calls------------------------------------------------------             
   loop       :  FOR assignment TO type DO statement { $$ = makefor(1, talloc(), $2, findid($4), NULL, NULL, $6); }
              |  IF expr THEN statement endif   { $$ = makeif($1, $2, $4, $5); }                        
