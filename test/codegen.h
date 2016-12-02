@@ -5,13 +5,13 @@
    pcode    = pointer to code = parseresult: (program foo (output) (progn ...))
    varsize  = size of local storage in bytes = blockoffs[blocknumber]
    maxlabel = maximum label number used so far = labelnumber    */
-void gencode(TOKEN pcode, int varsize, int maxlabel);
+int gencode(TOKEN pcode, int varsize, int maxlabel);
 
 /* Generate arithmetic expression, return a register number */
 int genarith(TOKEN code);
 
 /* Generate code for a statement */
-void genc(TOKEN code);
+int genc(TOKEN code);
 
 
 
@@ -20,13 +20,13 @@ void genc(TOKEN code);
    or you may replace them if you wish.  */
 
 /* Clear register used tables to mark all registers free.  */
-void clearreg();
+int clearreg();
 
 /* Mark a register unused */
-void unused(int reg);
+int unused(int reg);
 
 /* Mark a register used */
-void used(int reg);
+int used(int reg);
 
 /* Get a register */
 int getreg(int kind);
@@ -36,10 +36,10 @@ int getreg(int kind);
 int nonvolatile(int reg);
 
 /* Save caller-saves floating point registers on stack if in use */
-void savereg();
+int savereg();
 
 /* Restore caller-saves floating point registers from stack if in use */
-void restorereg();
+int restorereg();
 
 /* test if there is a function call within code: 1 if true, else 0 */
 int funcallin(TOKEN code);

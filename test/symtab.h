@@ -56,9 +56,6 @@
 
 #define MAXBLOCKS 50          /* Max number of program blocks           */
 
-#define MAXLABELS 50
-int all_labels[MAXLABELS];
-
 typedef struct symtbr {
   struct symtbr *link;
   char   namestring[16];
@@ -68,9 +65,9 @@ typedef struct symtbr {
   int    blocklevel;
   int    size;
   int    offset;
-  union  { char  stringconst[16];
-	   long  intnum;
-           float realnum; } constval;
+  union  {  char  stringconst[16];
+            long  intnum;
+            float realnum; } constval;
   int    lowbound;
   int    highbound;
   } SYMBOLREC, *SYMBOL;
@@ -128,3 +125,13 @@ int DEBUG;
 int blocknumber;           /* Number of current block being compiled */
 int blockoffs[MAXBLOCKS];  /* Storage offsets for each block         */
 int basicsizes[5];
+
+/* A struct for keeping track of all SYMBOLs
+  ever created. Mostly to provide a clean
+  way to free all tokens at the end. */
+typedef struct symnode {
+  SYMBOL sym;
+  struct symnode *next;
+} *SYMNODE;
+
+
