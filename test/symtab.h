@@ -56,6 +56,9 @@
 
 #define MAXBLOCKS 50          /* Max number of program blocks           */
 
+#define MAXLABELS 50
+int all_labels[MAXLABELS];
+
 typedef struct symtbr {
   struct symtbr *link;
   char   namestring[16];

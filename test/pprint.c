@@ -62,7 +62,7 @@ int strlength(char str[])           /* find length of a string */
 
 void printtok(TOKEN tok)             /* print a token in abbreviated form */
   { switch (tok->tokentype)
-	{case IDENTIFIERTOK:
+  {case IDENTIFIERTOK:
            printf ("%s", tok->stringval);
            break;
          case STRINGTOK:
@@ -73,47 +73,47 @@ void printtok(TOKEN tok)             /* print a token in abbreviated form */
              {case INTEGER: case POINTER:
                 printf ("%d", tok->intval);
                 break;
-	      case REAL:
+        case REAL:
                 printf ("%e", tok->realval);
                 break; }
-	 case DELIMITER: case RESERVED: case OPERATOR:
-	   break;
-	 }
+   case DELIMITER: case RESERVED: case OPERATOR:
+     break;
+   }
   }
 
 void dbugprinttok(TOKEN tok)  /* print a token in 'nice' debugging form */
   { if (tok == NULL)
        printf(" token %ld  NULL\n", (long)tok);
        else switch (tok->tokentype)
-	     { case IDENTIFIERTOK:
-	              printf(" token %ld  ID  %12s  dtype %2d  link %ld\n",
+       { case IDENTIFIERTOK:
+                printf(" token %ld  ID  %12s  dtype %2d  link %ld\n",
                              (long)tok, tok->stringval, tok->datatype,
                              (long)tok->link);
-		      break;
-	       case STRINGTOK:
-	              printf(" token %ld  STR %12s  dtype %2d  link %ld\n",
+          break;
+         case STRINGTOK:
+                printf(" token %ld  STR %12s  dtype %2d  link %ld\n",
                      (long)tok, tok->stringval, tok->datatype, (long)tok->link);
-		      break;
-	       case NUMBERTOK:
-		 switch (tok->datatype)
-		   {case INTEGER: case POINTER:
-		      printf(" token %ld  NUM %12d  dtype %2d  link %ld\n",
+          break;
+         case NUMBERTOK:
+     switch (tok->datatype)
+       {case INTEGER: case POINTER:
+          printf(" token %ld  NUM %12d  dtype %2d  link %ld\n",
                       (long)tok, tok->intval, tok->datatype, (long)tok->link);
-		      break;
-		    case REAL:
-		      printf(" token %ld  NUM %12e  dtype %2d  link %ld\n",
+          break;
+        case REAL:
+          printf(" token %ld  NUM %12e  dtype %2d  link %ld\n",
                       (long)tok, tok->realval, tok->datatype, (long)tok->link);
-		      break; };
+          break; };
                       break;
-		    case OPERATOR:
-	     printf(" token %ld  OP  %12s  dtype %2d  link %ld  operands %ld\n",
+        case OPERATOR:
+       printf(" token %ld  OP  %12s  dtype %2d  link %ld  operands %ld\n",
                       (long)tok, opprint[tok->whichval], tok->datatype,
                       (long)tok->link, (long)tok->operands);
-		      break;
-		    case DELIMITER: case RESERVED:
-		      debugprinttok(tok);
-		      break;
-	 }
+          break;
+        case DELIMITER: case RESERVED:
+          debugprinttok(tok);
+          break;
+   }
   }
 
 void printexpr(TOKEN tok, int col)     /* print an expression in prefix form */
@@ -126,19 +126,19 @@ void printexpr(TOKEN tok, int col)     /* print an expression in prefix form */
       { printf ("(%s", opprint[tok->whichval]);
         nextcol = col + 2 + opsize[tok->whichval];
         opnds = tok->operands;
-	start = 0;
-	while (opnds != NULL)
-	  { if (start == 0) 
-	       printf(" ");
-	       else { printf("\n");
-		      for (i = 0; i < nextcol; i++) printf(" ");
-		    }
-	    printexpr(opnds, nextcol);
-	    if ( opnds->tokentype == IDENTIFIERTOK && nextcol < 60 )
-	       nextcol = nextcol + 1 + strlength(opnds->stringval);
-	       else start = 1;
-	    opnds = opnds->link;
-	  }
+  start = 0;
+  while (opnds != NULL)
+    { if (start == 0) 
+         printf(" ");
+         else { printf("\n");
+          for (i = 0; i < nextcol; i++) printf(" ");
+        }
+      printexpr(opnds, nextcol);
+      if ( opnds->tokentype == IDENTIFIERTOK && nextcol < 60 )
+         nextcol = nextcol + 1 + strlength(opnds->stringval);
+         else start = 1;
+      opnds = opnds->link;
+    }
         printf (")");
       }
       else printtok(tok);
@@ -147,7 +147,7 @@ void printexpr(TOKEN tok, int col)     /* print an expression in prefix form */
 void ppexpr(TOKEN tok)       /* pretty-print an expression in prefix form */
   { if ( (long) tok <= 0 )
       { printf("ppexpr called with bad pointer %ld\n", (long)tok);
-	return; };
+  return; };
     printexpr(tok, 0);
     printf("\n");
   }
@@ -172,7 +172,7 @@ void dbugplist(TOKEN tok)           /* print a list of tokens for debugging */
 void dbugbprinttok(TOKEN tok)    /* print rest of token for debugging */
   { if (tok != NULL)
       printf("  toktyp %6d  which  %6d  symtyp %ld  syment %ld  opnds %ld\n",
-	     tok->tokentype, tok->whichval, (long)tok->symtype,
+       tok->tokentype, tok->whichval, (long)tok->symtype,
              (long)tok->symentry, (long)tok->operands);
   }
 
@@ -181,9 +181,9 @@ void dbugprintexpr(TOKEN tok) /* print an expression in 'nice' debugging form */
     dbugprinttok(tok);
     if (tok->tokentype == OPERATOR)
       { opnds = tok->operands;
-	while (opnds != NULL)
-	      { dbugprintexpr(opnds);
-		opnds = opnds->link;
-	      }
+  while (opnds != NULL)
+        { dbugprintexpr(opnds);
+    opnds = opnds->link;
+        }
       }
   }

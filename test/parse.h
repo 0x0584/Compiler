@@ -194,3 +194,7 @@ TOKEN instarray(TOKEN bounds, TOKEN typetok);
 
 /* talloc allocates a new TOKEN record. */
 TOKEN talloc();
+
+TOKEN get_last(TOKEN tok, int temp);
+
+TOKEN makerealtok();
